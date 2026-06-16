@@ -124,6 +124,8 @@ Final expected state:
 
 /srv/project = drwxrwsr-t root srvgrp
 
+![Screenshot of file](/Linux-Foundations/lab_images/Screenshot1.png)
+
 
 ## Expected behavior
 
@@ -141,6 +143,12 @@ enginfile.txt = -rw-rw-r-- srvengin srvgrp
 This confirmed that setgid was working.
 
 Deleting each other’s files failed as expected. This confirmed that the sticky bit was working.
+
+![Screenshot of file](/Linux-Foundations/lab_images/Screenshot3.png)
+
+
+![Screenshot of file](/Linux-Foundations/lab_images/Screenshot2.png)
+
 
 ## Unexpected failure
 
@@ -189,6 +197,10 @@ I checked file attributes:
 
 lsattr /srv/project/adminfile.txt /srv/project/enginfile.txt
 
+![Screenshot of file](/Linux-Foundations/lab_images/Screenshot6.png)
+
+
+
 I then checked Ubuntu kernel hardening settings:
 
 sysctl fs.protected_regular
@@ -202,7 +214,7 @@ fs.protected_regular = 2
 
 Ubuntu had fs.protected_regular=2 enabled.
 
-This kernel hardening setting can block certain write/create open operations against regular files that the current user does not own inside sticky writable directories.
+This kernel hardening setting can block certain write/create operations against regular files that the current user does not own inside sticky writable directories.
 
 The shell redirection operator:
 
@@ -211,14 +223,16 @@ The shell redirection operator:
 With fs.protected_regular=2, the kernel blocked the open operation even though normal Unix permission bits appeared to allow it.
 
 Temporarily setting the value to 0 allowed the append test to work:
+![Screenshot of file](/Linux-Foundations/lab_images/Screenshot8.png)
+
 
 sudo sysctl -w fs.protected_regular=0
-
-![he](linux-admin-labs/Linux-Foundations/lab_images/Screenshot 2026-06-16 at 00.28.08.png)
 
 After testing, the setting should be restored:
 
 sudo sysctl -w fs.protected_regular=2
+
+![Screenshot of file](/Linux-Foundations/lab_images/Screenshot9.png)
 
 This should not be left disabled permanently because it is a security hardening control.
 
@@ -245,3 +259,5 @@ Directory write + execute controls create/delete/rename operations.
 Sticky bit restricts deletion and renaming inside shared directories.
 setgid on a directory causes new files to inherit the directory group.
 Kernel hardening can still deny access even when normal permissions appear correct.
+
+screenshots to the lab can be found [here](/Linux-Foundations/lab_images/)
