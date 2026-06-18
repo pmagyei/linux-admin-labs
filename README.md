@@ -1,4 +1,4 @@
-# This Repository wll track my linux mastery journey
+# Linux-Admin-Labs repository 
 
 ## Phase 1
 navigation
