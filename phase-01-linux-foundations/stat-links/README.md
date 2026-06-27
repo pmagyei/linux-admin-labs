@@ -7,7 +7,7 @@ An inode stores metadata about a file or directory, it contains everything excep
 
 if two fileanames have the same inode number, they are hardlinks to the same inode.
 
-%h showws the number of hard links. A hard link is directory entry that points directly to the physical data(inode) on a storage device
+%h showws the number of hard links. A hard link is directory entry that points directly to an inode. The inode rferences the data blocks.
  
 stat file vs stat -L
 
@@ -18,7 +18,7 @@ stat -L file follows/dereferences the syling and shows metadata about the target
 stat exposes inode metada as well as permissions
 
 ### Hard links
- changes made to one filename are reflected to the other. if the original is deleted, data will still exist in the secondary hard link. Data will only be removed when all links to the data have been removed. 
+changes made to one filename are reflected to the other. if the original is deleted, data will still exist in the secondary hard link. Data will only be removed when all links to the data have been removed. 
 
 Limitations:
 Can only be created for regular files. 
@@ -38,7 +38,7 @@ A hard link is an additional directory entry pointing to the same inode. Removin
 A symbolic link is a separate file with its own inode that stores a path to another file. If the target path disappears, the symbolic link becomes dangling.
 
 
-![file](/phase-01-linux-foudations/stat-links/lab_images/Screenshot%202026-06-26%20at%2017.23.51.png)
+![file](/phase-01-linux-foundations/stat-links/lab_images/Screenshot%202026-06-26%20at%2017.23.51.png)
 
 ### timestamps
 
@@ -103,25 +103,25 @@ stat commands:
 
 ## stat/timestamp lab
 
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot%202026-06-27%20at%2001.35.49.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot%202026-06-27%20at%2001.35.49.png)
 
 
 Goal: 
 
-Understand and prove whichtimestamps changed and why.
+Understand and prove which time stamps changed and why.
 
 created directory stat-time-lab
 created file within the directory stat-time-lab
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot1.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot1.png)
 
 
-confirmed the timestamps for both the file and the parent firectory
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot2.png)
+confirmed the timestamps for both the file and the parent directory
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot2.png)
 
 
 renamed the file to renamed-file
 confirmed and validated the new timestamps
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot3.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot3.png)
 
 ### Observations
 
@@ -131,14 +131,14 @@ The file contents did not change so mtime stayed the same
 
 the file was not read, so atime stayed the same
 
-only the ctime changed becasue the inode meatadata/status chnaged. rename updates inode chnage time stamp, hence only %z shows a different value once the file was renmaed
+only the ctime changed becasue the inode metadata/status changed. rename updates inode chnage time stamp, hence only %z shows a different value once the file was renamed
 
 Parent directory:
 atime chnaged becasue it was read/accessed using the ls commands
-mtime changed because the contentriesents within the directory were chnaged(the file was renamed)
+mtime changed because the contents within the directory were chnaged(the file was renamed)
 ctime changed because the directory inode metadata/status changed when its entries were updated.
 
-hence %x %y %z shows different values after the contents within the directry were changed
+hence %x %y %z shows different values after the contents within the directory were changed
 
 ### key takeaways:
 
@@ -146,4 +146,4 @@ file ctime chnaged becasue its file inode status chnaged.
 
 the directory ctime chnaged becasue its inode (metadata) status chnaged
 
-the directory's atime also chnaged because it accessed/read, thid was triggered the ls and ls -l commands within the directory when validating the file witin the directory
+the directory's atime also chnaged because it was accessed/read, this was triggered the ls and ls -l commands within the directory when validating the file within the directory

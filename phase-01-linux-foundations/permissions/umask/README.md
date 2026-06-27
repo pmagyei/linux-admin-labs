@@ -6,7 +6,7 @@ default file permissions 666
 
 default directory permissions 777
 
-Umask removes permission bits from the default permissions at creation of the file/directory
+Umask removes permission bits from the default permissions at the default creation mode of a file/directory
 
 Example: 
 If Umask is currently set to 0002
@@ -15,11 +15,11 @@ File permissions at creation would be 664
 
 directory permissions creation would 775
 
-new file mode = 666 & umask 
+new file mode = 666 & ~umask 
 
-new directory mode = 777 & umask
+new directory mode = 777 & ~umask
 
-![ss](/phase-01-linux-foudations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.21.37.png)
+![ss](/phase-01-linux-foundations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.21.37.png)
 
 ### Umask lab
 
@@ -65,6 +65,6 @@ Umask can be set to the following, depending on environment and workload criteri
 027 for secure workloads, group readable, write removed, others blocked, user can read file/access directories 
 
 077 private environment only user/owner can access
-![ss](/phase-01-linux-foudations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.24.54.png)
+![ss](/phase-01-linux-foundations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.24.54.png)
 
-![ss](/phase-01-linux-foudations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.23.24.png)
+![ss](/phase-01-linux-foundations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.23.24.png)

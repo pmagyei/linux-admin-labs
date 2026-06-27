@@ -63,7 +63,8 @@ the file mode was -rw-rw-r--
 the users were members of srvgrp
 ACLs did not show extra restrictions
 file attributes did not show immutable flags
-Accidental discovery
+
+## Accidental discovery
 
 Later, I accidentally changed the directory mode from:
 
@@ -75,7 +76,7 @@ to:
 3755
 drwxr-sr-t
 
-![](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot12.png)
+![](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot12.png)
 
 After removing group write permission from the directory, users could append to each other’s existing files.
 
@@ -83,7 +84,8 @@ This created a paradox:
 
 Less directory write permission → lower-risk context → append allowed
 More directory write permission → higher-risk shared writable context → append denied
-Why this happened
+
+## Why this happened
 
 Removing group write from the directory changed the behaviour.
 
@@ -121,7 +123,8 @@ Delete requires:
 
 write + execute permission on the parent directory
 sticky-bit ownership rules allowing deletion
-Key takeaway
+
+## Key takeaway
 
 This lab showed that Linux permissions are not a single layer.
 
