@@ -140,19 +140,10 @@ ctime changed because the directory inode metadata/status changed when its entri
 
 hence %x %y %z shows different values after the contents within the directry were changed
 
-### key take away:
+### key takeaways:
 
 file ctime chnaged becasue its file inode status chnaged.
 
 the directory ctime chnaged becasue its inode (metadata) status chnaged
 
 the directory's atime also chnaged because it accessed/read, thid was triggered the ls and ls -l commands within the directory when validating the file witin the directory
-
-
-%x = time of last access,
-%y = time of last data modification,
-%z = time of last status change
-%n = file name
-
-
-### Takeaways
