@@ -19,7 +19,7 @@ new file mode = 666 & ~umask
 
 new directory mode = 777 & ~umask
 
-![ss](/phase-01-linux-foudations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.21.37.png)
+![ss](/phase-01-linux-foundations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.21.37.png)
 
 ### Umask lab
 
@@ -65,6 +65,6 @@ Umask can be set to the following, depending on environment and workload criteri
 027 for secure workloads, group readable, write removed, others blocked, user can read file/access directories 
 
 077 private environment only user/owner can access
-![ss](/phase-01-linux-foudations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.24.54.png)
+![ss](/phase-01-linux-foundations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.24.54.png)
 
-![ss](/phase-01-linux-foudations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.23.24.png)
+![ss](/phase-01-linux-foundations/permissions/umask/lab_images/Screenshot%202026-06-19%20at%2015.23.24.png)

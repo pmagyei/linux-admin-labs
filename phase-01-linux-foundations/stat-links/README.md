@@ -38,7 +38,7 @@ A hard link is an additional directory entry pointing to the same inode. Removin
 A symbolic link is a separate file with its own inode that stores a path to another file. If the target path disappears, the symbolic link becomes dangling.
 
 
-![file](/phase-01-linux-foudations/stat-links/lab_images/Screenshot%202026-06-26%20at%2017.23.51.png)
+![file](/phase-01-linux-foundations/stat-links/lab_images/Screenshot%202026-06-26%20at%2017.23.51.png)
 
 ### timestamps
 
@@ -103,7 +103,7 @@ stat commands:
 
 ## stat/timestamp lab
 
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot%202026-06-27%20at%2001.35.49.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot%202026-06-27%20at%2001.35.49.png)
 
 
 Goal: 
@@ -112,16 +112,16 @@ Understand and prove which time stamps changed and why.
 
 created directory stat-time-lab
 created file within the directory stat-time-lab
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot1.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot1.png)
 
 
 confirmed the timestamps for both the file and the parent directory
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot2.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot2.png)
 
 
 renamed the file to renamed-file
 confirmed and validated the new timestamps
-![ss](/phase-01-linux-foudations/stat-links/lab_images/Screenshot3.png)
+![ss](/phase-01-linux-foundations/stat-links/lab_images/Screenshot3.png)
 
 ### Observations
 

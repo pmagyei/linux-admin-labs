@@ -76,7 +76,7 @@ to:
 3755
 drwxr-sr-t
 
-![](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot12.png)
+![](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot12.png)
 
 After removing group write permission from the directory, users could append to each other’s existing files.
 

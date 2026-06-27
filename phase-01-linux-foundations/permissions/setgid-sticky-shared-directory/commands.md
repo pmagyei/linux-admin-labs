@@ -46,7 +46,7 @@ lsattr /srv/project/adminfile.txt /srv/project/enginfile.txt
 
 Confirmed that all positional flags are clear and no other attributes such a(append) or i(immutable) were set apart from the extent attribute by default.
 
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot6.png)
+![Screenshot of file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot6.png)
 
 
 ## sysctl

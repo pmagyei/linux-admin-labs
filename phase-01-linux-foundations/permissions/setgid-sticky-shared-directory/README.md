@@ -124,7 +124,7 @@ Final expected state:
 
 /srv/project = drwxrwsr-t root srvgrp
 
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot1.png)
+![Screenshot of file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot1.png)
 
 
 ## Expected behavior
@@ -144,10 +144,10 @@ This confirmed that setgid was working.
 
 Deleting each other’s files failed as expected. This confirmed that the sticky bit was working.
 
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot3.png)
+![Screenshot of file](/phase-01-linux-foubdations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot3.png)
 
 
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory//lab_images/Screenshot2.png)
+![Screenshot of file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory//lab_images/Screenshot2.png)
 
 
 ## Unexpected failure
@@ -197,7 +197,7 @@ I checked file attributes:
 
 lsattr /srv/project/adminfile.txt /srv/project/enginfile.txt
 
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot6.png)
+![Screenshot of file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot6.png)
 
 I then checked Ubuntu kernel hardening settings:
 
@@ -221,7 +221,7 @@ The shell redirection operator:
 With fs.protected_regular=2, the kernel blocked the open operation even though normal Unix permission bits appeared to allow it.
 
 Temporarily setting the value to 0 allowed the append test to work:
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot8.png)
+![Screenshot of file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot8.png)
 
 
 sudo sysctl -w fs.protected_regular=0
@@ -230,7 +230,7 @@ After testing, the setting should be restored:
 
 sudo sysctl -w fs.protected_regular=2
 
-![Screenshot of file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory//lab_images/Screenshot9.png)
+![Screenshot of file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory//lab_images/Screenshot9.png)
 
 This should not be left disabled permanently because it is a security hardening control.
 
