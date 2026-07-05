@@ -124,13 +124,13 @@ The service unit configuration determines how systemd starts, stops, reloads and
 ssh.service configuration file:
 
 ExecStartPre=/usr/sbin/sshd -t, this tests the sshd confirguration file, if it is invalid, the service should fail starting the daemon
-services often validate config before startup <b>
-ExecStart=/usr/sbin/sshd -D $SSHD_OPTS, this starts the main process(ssh) to start foreground allowing systemd totack the process directly <b>
-ExecReload=/usr/sbin/sshd -t, tests the configuration before reloading it <b>
-ExecReload=/bin/kill -HUP $MAINPID, sends SIGHUP to the main($MAINPID) SSH listener process <b>
-KillMode=process, only terminates the main process when stopping the service. this explains why a process does not terminate existing child/session processes when the listener is stopped or killed <b>
+services often validate config before startup <br>
+ExecStart=/usr/sbin/sshd -D $SSHD_OPTS, this starts the main process(ssh) to start foreground allowing systemd totack the process directly <br>
+ExecReload=/usr/sbin/sshd -t, tests the configuration before reloading it <br>
+ExecReload=/bin/kill -HUP $MAINPID, sends SIGHUP to the main($MAINPID) SSH listener process <br>
+KillMode=process, only terminates the main process when stopping the service. this explains why a process does not terminate existing child/session processes when the listener is stopped or killed <br>
 Restart=on-failure, systemd restarts the service if it is terminated unexpectedly.
-running "systemctl stop ssh.service" is an admin-requested stop, not a failure. "Restart=on-failure" should not restart from that command.<b>
+running "systemctl stop ssh.service" is an admin-requested stop, not a failure. "Restart=on-failure" should not restart from that command.<br>
 
 RestartPreventExitStatus=255, if there is an exit code of 255, the service should not restart the listener
 

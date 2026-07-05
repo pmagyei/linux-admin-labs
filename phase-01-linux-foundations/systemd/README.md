@@ -1,68 +1,75 @@
 ## systemd daemon-reload vs reload vs restart
 
-daemon-reload - forces systemd to scan all unit directories; makes systemd aware of completely new service files, deleted service files, or manual edits you made to an existing service file. It only updates systemd's internal memory. It never stops, starts, or restarts an application
+The goal is to understand the difference between:
 
-systemctl reload service - ells a currently running application to reload its own internal configuration file without shutting down. looks inside the service file and executes the exact command defined in the ExecReload=.
+systemctl daemon-reload
+systemctl reload "service"
+systemctl restart "service"
+
+#### systemctl daemon-reload
+
+Realoads systemd's knowledge of all unit files on disk. It scans all unit directories; <br>
+It is required after creating, deleting, or editing unit files such as:
+
+/etc/systemd/system/reload-drill.service
+
+It never stops, starts, or restarts a service process.
 
 
-### Part 1
+#### systemctl reload "service"
+systemctl reload service - reloads its own internal configuration file without stoping the service process. It looks inside the service file and executes the exact command defined in the ExecReload=. The Main PID stays the same.
 
-create a test service called:
+#### systemctl restart "service"
 
-reload-drill.service
+Stops and starts the service process. Cause the old process to exit and a new process to be created with a new Main PID.
 
-Changes to be tested:
 
-1. Change the systemd unit file
-2. Change the service reload behaviour
-3. Restart the service
+### Lab Service
 
-The goal is to understand systemd behaviour
+created a test service named reload-drill.service under:
 
-reload-drill.service created in /etc/systemd/system/ directory
+/etc/systemd/system/reload-drill.service
+
+
+The service used the following configuration:
 
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot1.png)
 
-reloaded the daemon to that systemd became aware of  the new service
+The service writes evidence to:
 
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot2.png)
+/tmp/reload-drill.log
 
+ExecStart writes a START line and then runs sleep infinity so the service remains active.
 
-The service unit configuration was edited due systax errors and typos which were corrected.
-
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot3.png)
-
-reloaded and restarted the daemon again to apply the new service unit configuration
-
-notice that the main PID has chnaged from 1166 to 1244
-
-when a service unit is stopped and started or restarted the main PID changes. A new process is started by systemd
-
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot4.png)
-
-the unit service should have generate two logs:
-the 1st log from the 1166 process
-
-th 2nd lof from 1244 process
-
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot5.png)
-
-Notice how reloading did not generate a log
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot6.png)
+ExecReload writes a RELOAD line when the service is reloaded.
 
 
-Due to systemd not using shell to execute commands the redirection operator >> does not work in unit configuration file.
+###### Important shell lesson
 
-so the configuration file was edited, the daemon reloaded and the and reload service was restarted.
+systemd does not interpret shell syntax such as the redirection operator >> by itself. The command must explicitly run through a shell:
 
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot7.png)
+This would not work: echo "text" >> /tmp/file
 
-I also enabled the service because even after reloading and starting the systemctl status output showed the service was still inactive once i enabled it I reloaded and started the service and it worked
+Bash must be explicitly invoked allowing the shell expansions and operator usage: /bin/bash -c 'echo text >> /tmp/file'. 
 
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot8.png)
+![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot11.png)
 
 
-### Part 2: Prove that systemctl reload does not reload the unit file
+After creating the unit file, I ran:
+
+sudo systemctl daemon-reload
+sudo systemctl restart reload-drill.service
+systemctl status reload-drill.service
+
+daemon-reload made systemd aware of the new unit file.
+
+restart stoped and started the service.
+
+status confirmed that the service was active and showed the Main PID.
+
+![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot18.png)
+
+### Part 2: Prove that systemctl reload does not restart the service
 
 Reload log appears:
 
@@ -71,28 +78,39 @@ Reload log appears:
 Main PID stays the same:
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot10.png)
 
+This proved that: <br>
+"systemctl reload service" does not start, stop or restart a service, it only runs the reload behaviour defined in the unit.
 
-neither "systemctl daemon-reload" or "systemctl reload service"
-starts, stops or restarts a service, this means the PID stays the same
+### Part 3: edit the unit file without daemon-reload
 
-when the service is started the ExexStart line will be executed
-when the service is reload the ExecReload line will be executed
+I changed:
 
-### Part 3: edit unit file without daemon reload
+ExecReload=/bin/bash -c 'echo "RELOAD version=1 time=$(date)" >> /tmp/reload-drill.log'
+
+to:
+
+ExecReload=/bin/bash -c 'echo "RELOAD version=2 time=$(date)" >> /tmp/reload-drill.log'
+
 
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot11.png)
 
-The log will output will use REALOAD version=1 because configuration has been updated, systemd is still using what it has saved in its memory, a daemon reload would ensure that systemd is aware of the update in the configuration file.
+Systemd still used the old version of the unit file:
 
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot12.png)
 
+This proved that editing the file does not automatically update systemd’s loaded unit configuration.
 
-### Part 4: run daemon-reload
+
+### Part 4: running daemon-reload
 
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot13.png)
 
-The daemon-reload did not affect the services status or main pid however the reload version2 was in the log output
+showed "RELOAD version=2" in the log output.
 
+This proves: <br>
+daemon-reload updates systemd’s unit-file knowledge <br>
+reload runs ExecReload <br>
+Neither command affects the service's status or main PID
 
 ### Part 5: restart behaviour observation
 
@@ -100,14 +118,52 @@ The daemon-reload did not affect the services status or main pid however the rel
 
 The current main PID is 2887
 
-When restaring the unit service, it stops it and starts it, this triggeres a new process being created with a new PID. The output of the log shows a new PID for the process.
+Executing the command "systemctl restart reload-drill.service"
+
+the service created a new START log entry.
+
+The Main PID changed.
+
+This proved that restart is different from reload:
+
+restart: stops and starts the service <br>
+reload: runs ExecReload without replacing the main process
 
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot15.png)
+
 
 ### Part 6: chaos engineering
 
 ![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot16.png)
 
-If service file does not have an ExecReload= line defined, the command will fail with an error. Because ExecReload=, defines the reload behavioue of the service.
+I commented out the ExecReload= line and ran:
 
-![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot17.png)
+s![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot17.png)
+
+
+The reload failed with:
+
+Job type reload is not applicable for unit reload-drill.service
+
+Root cause:
+
+The service had no reload behaviour defined.
+
+A service can only be reloaded if systemd knows how to reload it, usually through ExecReload=.
+
+#### The Model
+
+Changed a unit file?: <br>
+sudo systemctl daemon-reload
+
+Want the running service to reload its own config? <br>
+sudo systemctl reload "service"
+
+Want to stop and start the service process?
+sudo systemctl restart "service"
+
+enable is separate: <br>
+systemctl enable "service"
+
+This configures boot-time startup behaviour. 
+It does not start the service immediately.
