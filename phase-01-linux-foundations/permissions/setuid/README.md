@@ -12,7 +12,7 @@ After setting setuid on the shell script, the script still printed out the UID o
 #### Conclusion:
 This was not a valid way to prove effective uid because when running the script, linux generally ignores the setuid when running interpreted scripts(bash, python).
 
-To understand setuid better I inspected the /etc/bin/passwd, which is an already present setuid binary.
+To understand setuid better I inspected the /usr/bin/passwd, which is an already present setuid binary.
 stat -c "%A %a %U %G %n" /usr/bin/passwd
 ls -l  /usr/bin/passwd
 

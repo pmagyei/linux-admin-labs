@@ -25,7 +25,7 @@ stat -c "%A %a %U %G %n" /srv/project/enginfile.txt
 
 I proved that the directory and files had the intended permissions and bits 
 
-![file](/phase-01-linux-foudations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot10.png)
+![file](/phase-01-linux-foundations/permissions/setgid-sticky-shared-directory/lab_images/Screenshot10.png)
 
 
 ## getfacl 
