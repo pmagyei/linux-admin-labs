@@ -66,25 +66,51 @@ I confirmed the state of the process was T, T indicates the the porcess was stop
 
 "bg %1" resumes the job in the background.
 
-FinallyI terminated the process with:
+Finally terminated the process with:
 
 "kill -TERM 14840"<br>
 
 SIGTERM requests termination, in this lab "sleep" exited. 
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot16.png)
 
 
-## What I expected
 
-## Commands used
+#### parent/child model
 
-## Evidence
+Started by confirming the current shell pid<br>
+"echo $$" 15159
 
-## Failure introduced / mistake observed
+Started a sleep process running in the background, the shell returned its pid: 15303 <br>
+the sleeps PPID is 15159
 
-## Diagnosis
+The sleep ppid matches the shell's pid, this means that the current shell started the sleep process
 
-## Fix / correction
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot17.png)
 
-## Final mental model
+Another observation, using a separte shell window, for example in tmux, each session/window/pane will have a different shell pid number, however these shell sessions will share the same ppid.
 
-## Relevance to infrastructure/cloud/DevOps
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot18.png)
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot19.png)
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot20.png)
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot21.png)
+
+
+#### Orphan Process
+
+I confirmed the current shell process being used using "$$"<br>
+PID of the shell: 18199<br>
+I started a sleep process in the background, the shell returned the processe PID: 18205
+
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot22.png)
+
+
+I confirmed the sleep process PID, its PPID was the same as the current shell's PID
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot23.png)
+
+exited the current shell and inspected the sleep process ps attributes in another shell:
+
+after the parent shell exited, the sleep process ppid changed to 1. On this systemd, PID 1 belongs to systemd; systemd adopted the orphaned procees.
+
+The child process does not exit when the parent exits, if the child keeps running after the parent exits. It becomes orphaned and is adopted by anothe process, usually PID 1/systemd.
+
+![ss](/phase-01-linux-foundations/processes/lap_images/Screenshot24.png)
