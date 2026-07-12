@@ -1,10 +1,16 @@
-Logs & journalctl
+# logs & journalctl lab
+
+## Goal
+
+To understand how to use logs as evidence of events that have occured in the system.<br>
+Iterpret state and logs from `systemctl status <service>` and `journalctl -u <service`.<br> 
+Filtering and narrowing scope to reduce noise, and prove that no entries does not mean nothing happened.
 
 #### Service status vs Journal logs
 
-I used "ssh.service" was used because the system already had SSH activity
+I used "ssh.service" because the system already had SSH activity
 
-confirmed state and logs using `systemctl status ssh.service --no pager`<br>
+confirmed state and logs using `systemctl status ssh.service --no-pager`<br>
 
 output showed:
 the service state was active(running), the main PID: 885, which is the main ssh listener tracked by systemd 
@@ -16,18 +22,18 @@ logs of recent journal entries related to the unit including: <br>
 
 these are SSH authentication and PAM session events, the list does not prove that there is still active ssh sessions. The logs show events proving that it happened.
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot1.png)
+![systemctl status ssh.service](lab_images/Screenshot1.png)
 
 I then ran `journalctl -u ssh.service -n 20`
 
 This showed recent(last 20) journal entries associated to `ssh.service` 
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot2.png)
+![journalctl -u ssh.service](lab_images/Screenshot2.png)
 
 
 the difference between the two queries is that
 
-`sysetmtctl status ssh.service` shows the current unit state and recent related logs
+`systemctl status ssh.service` shows the current unit state and recent related logs
 
 `journalctl -u ssh.service` shows journal entries specific to that unit
 
@@ -37,7 +43,7 @@ I intentionally ran:
 "journalctl --user-unit=sshd"<br>
 
 this returned `No entries`
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot3.png)
+![journalctl --user-unit=sshd](lab_images/Screenshot3.png)
 
 this filter is wrong because:
 `--user-unit=sshd` searches user-scoped systemd units. SSH is running as a system service unit, not as a user session unit.
@@ -47,13 +53,13 @@ I then ran:
 `journalctl -u ssh.service`<br>
 this returned  SSH authentication and session logs.
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot4.png)
+![journalctl -u ssh.service](lab_images/Screenshot4.png)
 
 The difference is:
 
-`ssh.service` is the sytemd unit name
+`ssh.service` is the systemd unit name
 
-`sshd` is the daemom/process name
+`sshd` is the daemon/process name
 
 `--user-unit` searches user-scoped units<br>
 `-u ssh.service` filters journal entries for the system service unit.
@@ -62,11 +68,11 @@ The difference is:
 
 To view live logs from the ssh service I ran: `journalctl -u ssh.service -f`, it shows previous events as well as live events. 
 
-I ssh into the same VM from another terminal window, two events occured:
+I ssh into the same VM from another terminal window, two events occurred:
 
 `Accepted publickey for lfcs-admin` and `pam_unix(sshd:session): session opened`
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot5.png)
+![Accepted publickey & pam_unix](lab_images/Screenshot5.png)
 
 I then performed `sudo systemctl reload ssh.service` 
 
@@ -75,7 +81,7 @@ this runs the unit's ExecReload actions:
 2. kill -HUP $MAINPID sends SIGHUP to the main sshd process. Causing sshd to reload configuration without a full service restart.
 
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot7.png)
+![sudo systemctl reload ssh.service](lab_images/Screenshot7.png)
 
 
 I then ran `sudo systemctl restart ssh.service`:
@@ -88,12 +94,12 @@ The logs showed a different lifecycle:
 - ssh.service started again
 - sshd began listening on port 22 again for IPv4 and IPv6
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot8.png)
+![sudo systemctl restart ssh.service](lab_images/Screenshot8.png)
 
 
 I checked the service status:
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot9.png)
+![systemctl status ssh.service](lab_images/Screenshot9.png)
 
 The ExecStartPre validation process was PID 25363<br>
 The MAIN PID was 25365<br>
@@ -110,19 +116,19 @@ The previous MAIN PID was 885
 I ran log filtering based on different time windows
 
 last hour logs:
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot10.png)
+![1 hour ago](lab_images/Screenshot10.png)
 
 the "1 hour ago" query used the smallest time window
 
 today's logs:
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot11.png)
+![today's logs](lab_images/Screenshot11.png)
 
 logs on the 10th of july (full 24hr)
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot12.png)
+![24hr logs](lab_images/Screenshot12.png)
 
 the explicit 24hr time window for 10th of July showed the largest time range for this lab
 
-using `--since` during an incdent narrows down to the perdiod when the issue started, reducing noise and making it easier to connect symptoms to events. 
+using `--since` during an incident narrows down to the period when the issue started, reducing noise and making it easier to connect symptoms to events. 
 
 If the time window is wrong it can hide relevant evidence, return no entries, or show unrelated events that mislead troubleshooting.
 
@@ -130,22 +136,21 @@ If the time window is wrong it can hide relevant evidence, return no entries, or
 
 I ran `journalctl -u ssh.service -p warning..alert -n 20 --no-pager`, the query showed no entries in that query scope.
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot13.png)
+![journalctl -u ssh.service -p warning..alert](lab_images/Screenshot13.png)
 
 
 I ran `journalctl -p err -n 20 --no-pager`, this returned several system-wide errors, including failed services, sudo/PAM errors, systemctl bus connection failures, and kernel messages.
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot14.png)
+![journalctl -p err](lab_images/Screenshot14.png)
 This command was not scoped to `ssh.service`, so it searched the wider system journal.
 
 I ran `journalctl -p warning..alert --since today --no-pager`, to check warning to alert logs, this returned no entries:
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot15.png)
+![journalctl -p warning..alert](lab_images/Screenshot15.png)
 
+No entries means there were no matching visible journal entries for that unit filter, priority range, time window, permissions, and journal retention. It does not prove that no event ever happened.
 
-No entries means there were no matching visible journal entries for that query scope, priority range, time window, permissions. It does not prove that no events happened.
-
-severity ranges:
+Severity levels:
 
 0 emerg
 1 alert
@@ -167,7 +172,7 @@ I re-created the `reload-drill.service` and deliberately broke it by the `ExecSt
 
 `ExecStart=/not/a/real/command`
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot16.png)
+![ExecStart=/not/a/real/command](lab_images/Screenshot16.png)
 
 After editing the unit's file I ran: `systemctl daemon-reload`
 
@@ -177,7 +182,7 @@ then I tried to restart the service:
 
 The service entered a failed state.
 
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot17.png)
+![sudo systemctl restart reload-drill.service](lab_images/Screenshot17.png)
 
 `systemctl status reload-drill.service --no-pager` showed:
 
@@ -190,26 +195,26 @@ This showed that systemd tried to execute `/not/a/real/command`, but it could no
 
 `status=203/EXEC` means systemd could not execute the command defined in `ExecStart`
 
-Thr root cause was a misconfigured `ExecStart` path.
+The root cause was a misconfigured `ExecStart` path.
 
 To fix it, I restored the original `ExecStart` command, ran `systemctl daemon-reload`, and restarted the service.
 
 #### second failure: unit file quote error
 
-While restoring the service, I introduced another sytax error by breaking the qutote structure in the `ExecStart` line.<br>
+While restoring the service, I introduced another syntax error by breaking the quote structure in the `ExecStart` line.<br>
 When restarting the service, systemd returned:
 `Failed to restart reload-drill.service`
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot19.png)
+![Failed to restart reload-drill.service](lab_images/Screenshot19.png)
 
 I checked the journal for logs:
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot20.png)
+![journalctl -u reload-drill.service](lab_images/Screenshot20.png)
 
-The journal showed `Unbalanced quoting`, this meant systemd could not parse the unit's file becase the quoting was invalid.
+The journal showed `Unbalanced quoting`, this meant systemd could not parse the unit's file because the quoting was invalid.
 
-I also noticed that I only used one `>` instead of `>>` , this would ovewrite the file instead of appending.
+I also noticed that I only used one `>` instead of `>>` , this would overwrite the file instead of appending.
 
 I corrected the `ExecStart` line:
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot21.png)
+![unit file](lab_images/Screenshot21.png)
 
 ran:
 
@@ -228,7 +233,7 @@ The service returned to:
 `active (running)`
 
 The log file also showed new `START` and `RELOAD` entries, proving the service was working again.
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot22.png)
+![restoring the service](lab_images/Screenshot22.png)
 
 `systemctl status` shows the current service state and high-level failure reason.
 
@@ -252,7 +257,7 @@ This returned log lines containing:<br>
 `Accepted publickey for lfcs-admin`
 
 These entries show successful SSH public key authentication.
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot23.png)
+![Accepted publickey for lfcs-admin](lab_images/Screenshot23.png)
 
 
 To find PAM session creation events, I ran:<br>
@@ -260,7 +265,7 @@ To find PAM session creation events, I ran:<br>
 
 This returned log lines containing:<br>
 `pam_unix(sshd:session): session opened`
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot24.png)
+![pam_unix(sshd:session)](lab_images/Screenshot24.png)
 These entries showed that PAM opened SSH login sessions.
 
 
@@ -269,11 +274,31 @@ To count accepted public key authentication events, I ran:<br>
 
 The output was:<br>
 `17`
-![ss](/phase-01-linux-foundations/journalctl-logs/lab_images/Screenshot25.png)
+![17](lab_images/Screenshot25.png)
 
 
 This means there were 17 matching `accepted` log lines within the last 50 journal entries for `ssh.service`.
 
 `grep` is useful with `journalctl` because it reduces noise and helps isolate specific patterns during troubleshooting.
 
-The risk of filtering too narrowly is that relevant evidence may be hidden. No output means no matching visible entries for that query, its not proof that nothing happened.
+The risk of filtering too narrowly is that relevant evidence may be hidden. No output means no matching visible entries for that query, it is not proof that nothing happened.
+
+## Final Mental Model
+
+`systemctl status` shows the current state of a unit and recent related log entries.
+
+`journalctl` queries the systemd journal.
+
+`journalctl -u <unit>` filters logs for a specific systemd unit.
+
+`--user-unit` searches user-scoped units, which is different from system service units.
+
+`-f` follows logs live.
+
+`--since` and `--until` narrow the time window.
+
+`-p` filters by priority/severity.
+
+No output means no matching visible entries for the query. It does not prove that nothing happened.
+
+During troubleshooting, logs should be used as evidence to confirm or reject a hypothesis.
