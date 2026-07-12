@@ -8,7 +8,7 @@ systemctl restart "service"
 
 #### systemctl daemon-reload
 
-Realoads systemd's knowledge of all unit files on disk. It scans all unit directories; <br>
+Reloads systemd's knowledge of all unit files on disk. It scans all unit directories; <br>
 It is required after creating, deleting, or editing unit files such as:
 
 /etc/systemd/system/reload-drill.service
@@ -17,14 +17,14 @@ It never stops, starts, or restarts a service process.
 
 
 #### systemctl reload "service"
-systemctl reload service - reloads its own internal configuration file without stoping the service process. It looks inside the service file and executes the exact command defined in the ExecReload=. The Main PID stays the same.
+systemctl reload "service" - asks the running service to execute its reload behaviour, it looks inside the service file and executes the exact command defined in the ExecReload=. The Main PID stays the same.
 
 #### systemctl restart "service"
 
 Stops and starts the service process. Cause the old process to exit and a new process to be created with a new Main PID.
 
 
-### Lab Service
+### Part 1: Lab Service
 
 created a test service named reload-drill.service under:
 
@@ -57,9 +57,9 @@ Bash must be explicitly invoked allowing the shell expansions and operator usage
 
 After creating the unit file, I ran:
 
-sudo systemctl daemon-reload
-sudo systemctl restart reload-drill.service
-systemctl status reload-drill.service
+sudo systemctl daemon-reload <br>
+sudo systemctl start reload-drill.service <br>
+systemctl status reload-drill.service <br>
 
 daemon-reload made systemd aware of the new unit file.
 
@@ -110,7 +110,7 @@ showed "RELOAD version=2" in the log output.
 This proves: <br>
 daemon-reload updates systemd’s unit-file knowledge <br>
 reload runs ExecReload <br>
-Neither command affects the service's status or main PID
+daemon-reload does not affect the running service process. A "systemctl reload" command does not replace the Main PID, but it can still fail if the unit has no reload behaviour defined.
 
 ### Part 5: restart behaviour observation
 
@@ -138,7 +138,7 @@ reload: runs ExecReload without replacing the main process
 
 I commented out the ExecReload= line and ran:
 
-s![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot17.png)
+![ss](/phase-01-linux-foundations/systemd/lab_images/Screenshot17.png)
 
 
 The reload failed with:
@@ -153,7 +153,7 @@ A service can only be reloaded if systemd knows how to reload it, usually throug
 
 #### The Model
 
-Changed a unit file?: <br>
+Changed a unit file? <br>
 sudo systemctl daemon-reload
 
 Want the running service to reload its own config? <br>
