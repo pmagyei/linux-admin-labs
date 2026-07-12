@@ -3,10 +3,10 @@
 ## Phase 1
 navigation <br>
 files/directories <br>
-permissions <br>
-processes <br>
-services <br>
-logs <br>
+[permissions](/phase-01-linux-foundations/permissions/) <br>
+[processes](/phase-01-linux-foundations/processes/) <br>
+[systemd & services](/phase-01-linux-foundations/systemd/) <br>
+[logs & journalctl](/phase-01-linux-foundations/journalctl-logs/) <br>
 environment <br>
 man-page fluency
 
