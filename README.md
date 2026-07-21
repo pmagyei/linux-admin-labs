@@ -3,11 +3,14 @@
 ## Phase 1
 navigation <br>
 files/directories <br>
+text processing & pipes <br>
 [permissions](/phase-01-linux-foundations/permissions/) <br>
 [processes](/phase-01-linux-foundations/processes/) <br>
 [systemd & services](/phase-01-linux-foundations/systemd/) <br>
 [logs & journalctl](/phase-01-linux-foundations/journalctl-logs/) <br>
 environment <br>
+networking <br>
+package management <br>
 man-page fluency
 
 ## Phase 2
