@@ -175,7 +175,7 @@ Both use `/bin/bash`
 `awk` is pattern-action processing language.
 
 the basic structure is:
-`pattern { action }`, if the pattern matches, `awk` performs the action. if not pattern is provided, the action runs for eveyline.
+`pattern { action }`, if the pattern matches, `awk` performs the action. if no pattern is provided, the action runs for eveyline.
 
 By default awk separates fields by using whitespaces.
 
@@ -208,23 +208,266 @@ The matching users are:
 
 ## Lab 7: sed transformations
 
+`sed` is stream editor for filtering and transforming text
+`sed` reads input linen by line, appllies editing rules, and prints the result to stdout by deafult. It does not modify the orifinal file unless `-i` is used or putput is tediecteed to another file.
+
+### Substitution 
+
+`sed 's/ERROR/CRITICAL/g' service.log` 
+
+This a susbstitute command:
+`s` means susbstitute
+`ERROR` is the serach pattern 
+`CRITICAL` is the replacement text
+`g` replaces every match on the line
+
+The command replaced `ERROR` with `CRITICAL` in the output, the original file `service.log` was not modified.
+![sed/error/critical/g_service.log](lab_images/Screenshot32.png)
+
+
+### Extracting usernames
+
+`sed -n 's/.*user=\([^ ]*\).*/\1/p' service.log`
+
+By default `sed` prints every line; The `-n`suppresses default printing. The substitution pattern captures the value after `user=` and print only the username.
+
+`/p` only prints lines where substitution succeded.
+
+ This extracted the usernames from log lines that contained a `user=` field.
+
+![sed/error/critical/g_service.log](lab_images/Screenshot33.png)
+
+### Redacting sensitive data
+
+`sed 's/172\.120\.35\.1/REDACTED_IP/g' service.log`, this relpaces the IP addess with `REDACTED_IP`
+
+The dots are escaped so that it matches only a literal period character.
+
+This proves `sed` can be used to sanitise logs before publishing screenshots or README examples
+
+Sensitive data that should be redacted before publishing includes:
+- IP addresses
+- hostnames
+- usernames where required
+- tokens
+- keys
+- fingerprints
+- internal paths or customer identifiers
+![sed/error/critical/g_service.log](lab_images/Screenshot34.png)
+
 ## Lab 8: Redirection
+
+### stdout
+
+`stdout`is the startds output strean. By default, stdout is displayed in the termimal, but it can redirected to a file.
+
+`grep "ERROR" service.log > errors.log`, 
+This searches `service.log` for lines containing "ERROR", if there are matches these are written to 'errors.log'.
+
+The `>` operator redirects stdout and overwrites the target file if it exists, if does not exist it is created.
+
+![grep_cat_error_errors.log](lab_images/Screenshot35.png)
+
+`grep "WARNING" service.log >> errors.log`
+this searches `service.log` for lines containing "WARNING", if there are matches these are appended to `errors.log`.
+
+The `>>` operator redirects stdout and appends the target file instead of overwriting it, similar to `>`, if the file doesnot exist it is created.
+
+![grep_cat_warning_errors.log](lab_images/Screenshot36.png)
+
+### stderr
+
+`stderr` is the standard error steram. Progrms use sterr for error and iagnostic messages.
+
+`ls /not/a/real/path > stdout.log`
+This redirects stdout to `stdout.log` but the path does not exist. The error message still appeard to the terminal because it was written to `stderr` not `stdout`.
+
+`stdout.log` was empty because the command produced a `stderr` output.
+
+`ls /not/a/real/path 2> stderr.log`
+
+Redirected stderr to `stderr.log`, the error message was written into `stderr.log`
+
+![stderr](lab_images/Screenshot37.png)
+
+### Summary
+
+- `>` redirects stdout and overwrites
+- `>>` redirects stdout and appends
+- `2>` redirects stderr and overwrites
+- stdout is normal command output
+- stderr is error/diagnostic output
+- stdout and stderr can be redirected independently
 
 ## Lab 9: journalctl pipeline
 
-## Lab 10: grep process trap
+For this lab I queried SSH service logs and built a pipeline to filter, redact, count and extracted useful fields.
+
+### Filter accepted SSH authentication events and redact sensitive data
+
+`journalctl -u ssh.service -n 50 --no-pager | grep -i "accepted" | sed -E 's/from ([0-9]{1,3}\.){3}[0-9]{1,3}/from REDACTED_IP/g' | sed 's/SHA256:[^ ]*/SHA256:REDACTED_KEY/g'`.
+
+This searched for the last 50 SSH journal entries for lines containing `accepted`. The ssh matching events showed SSH public key authentication being accepted.
+
+I used `sed` to redact senitive values before pulishing the output. 
+
+The redacted values include:
+- Source IP address
+- SSH public key fingerprint
+
+This matters because logs can expose internal IP's, usernames, hostnames and authentication figerprints.
+
+![grep_sed.journalctl_ssh](lab_images/Screenshot39.png)
+
+### Count matching events
+
+`journalctl -u ssh.service -n 50 --no-pager | grep -i "accepted" | wc -l` 
+
+This counted how many matching `accepted` log lines appeared in the last 50 SSH journal entries, the output was `14`.
+![grep_wc-l.journalctl_ssh](lab_images/Screenshot40.png)
+
+`journalctl -u ssh.service -n 50 --no-pager | grep -i "session opened" | wc -l` the output was `14`. This counted matching `sessions opened` in the same query scope.
+![grep_sed.journalctl_ssh](lab_images/Screenshot41.png)
+
+The counts are usefull because during investigation the can help estimate event frequency and spot unexpectd changes. However they only count matching line not unique or active sessions.
+
+
+### Extract timestamp and process fields
+
+`journalctl -u ssh.service -n 50 --no-pager | grep -i "accepted" | awk '{print $1, $2, $3, $5}'`
+
+This extracted:
+
+- month
+- day
+- time
+- PID field
+
+This produced a neat view of the when accepted SSH events occured and which `sshd` process logged them.
+![grep_sed.journalctl_ssh](lab_images/Screenshot42.png)
+
+
+### Pattern risk
+When using `grep`, if the pattern is too narrow, you risk excluding logs that are relevant to the event you are investigating, if the pattern is too broad, it may include unrelated events and inflate the findings.
+
+For example, `accepted` is broader than `Accepted publickey`.
+
+ 
+## Lab 10: pipeline reliability and reporting
+
+### Part A grep process trap
+
+`sleep 600 &` starts a long process running in the background 
+![sleep600&](lab_images/grep-process-trap/Screenshot43.png)
+
+`ps` displays information of active processes.<br> 
+`ps aux | grep sleep` 
+`ps aux` displays information of actives processes, its stdout is piped into `grep sleep` fwhich prints lines that contain the pattern `sleep`. I expected only the `sleep` process to show, however there was another entry from `grep`; `grep` is also a process, if the search pattern appears in the grep command line, grep can match itsel. This proves that pipelines can  also produce  misleading results.
+![psaux|grepsleep_](lab_images/grep-process-trap/Screenshot44.png)
+
+
+`ps aux | grep sleep | grep -v grep` 
+`-v` is invert-match, it selects non-matching lines to send to stdout. In this case only the lines that do not contain `grep` were printed.  
+![psaux|grepsleep|grep-v](lab_images/grep-process-trap/Screenshot45.png)
+
+
+`ps aux | grep '[s]leep'` matches the line containing `sleep`, because `[s]` matches the character `s`. 
+However, the grep command containt the pattern `[sleep]`, not the literal string `sleep`, so grep does not match its own process line.
+
+![psaux|grep[s]leep](lab_images/grep-process-trap/Screenshot46.png)
+
+
+`pgrep -a sleep`, `pgrep` lists outputs PIDs which match the selection criteria to stdout. `pgrep` will only list the processes that match the criteria.
+
+![pgre-asleep](lab_images/grep-process-trap/Screenshot47.png)
+
+
+`ps` can still be usefull as it also shows the command, user, stat and pid. When investigating an event having several refrences point to connect the dots will allow trooubleshoting be more accurate.
+
+### Part B awk counts and reporting
+
+`awk '{count[$3]++} END {for (level in count) print count[level], level}' service.log`, counts how many times each warning level appears in the 3rd column and prints the list.
+![awk_count-level](lab_images/awk-counts/Screenshot1.png)
+
+`awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log`, similarly to the above however it counts how many times each service appears in the 4th column and prints the list.
+![awk_count-level](lab_images/awk-counts/Screenshot2.png)
+
+`awk '$3=="ERROR" {print $1, $2, $4, $5, $6, $7}' service.log`, looks for the lines where the 3rd field is `ERROR`, then prints the date, time, service name, and part of the error message.
+![awk_count-level](lab_images/awk-counts/Screenshot3.png)
+
+`awk '{count[$3]++} END {for (level in count) print count[level], level}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each severity level appears in the 3rd column and prints the list sorted from highest occurences to the lowest.
+INFO appeared the most in the severity.
+
+`awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each service appears in the 4th column and prints the list sorted from highest occurences to the lowest. SSH has the most apperances
+
+
+#### awk vs cut
+awk is better because by default it splits lines by whitespace as well as that i can handle more complex pattern processing than cut, cut is used for simple predictable field extraction when the delimiter and field positions are predictable; i`awk` is better here becasue it can filter, count and generate reports. Counts should be treated as evidence, not final conclusions. They depend on  the log source, time window, filters, and field assumptions in the pipeline.
+
 
 ## Final mental model
 
+Linux commands usually communicate through streams.
+
+- stdin is input
+- stdout is normal output
+- stderr is error or diagnostic output
+
+Pipes connect stdout from one command to stdin of another command.
+
+Redirection writes stdout or stderr into files.
+
+Text-processing tools have different jobs:
+
+- `cat` prints file contents
+- `head` shows the beginning of a file
+- `tail` shows the end of a file
+- `wc` counts lines, words, and bytes
+- `grep` filters lines by pattern
+- `cut` extracts simple delimiter-based fields
+- `sort` orders lines
+- `uniq` collapses adjacent duplicate lines
+- `awk` filters, extracts, counts, and reports using fields
+- `sed` transforms streams and can redact sensitive data
+
+A good pipeline is built in stages:
+
+1. collect evidence
+2. filter noise
+3. extract useful fields
+4. count or summarise
+5. redact sensitive data
+6. verify the result
+
+Bad pipelines can mislead if the pattern is too broad, too narrow, case-sensitive by accident, ordered incorrectly, or matching the command itself.
+
 ## Relevance to infrastructure engineering
 
+Text processing is a core Linux administration skill because most operational evidence is text.
 
+Examples include:
 
+- service logs
+- authentication logs
+- systemd journal output
+- package manager output
+- CI/CD logs
+- Terraform output
+- cloud-init logs
+- SSH logs
+- web server logs
+- firewall logs
 
-### Commands used
+In infrastructure work, these tools help with:
 
-### Evidence
+- incident investigation
+- failed deployment analysis
+- authentication review
+- service troubleshooting
+- log redaction before publishing evidence
+- quick operational reporting
+- validating automation output
 
-### Explanation
+This lab proves beginner-to-intermediate competence with Linux text pipelines.
 
-### Mistake or trap observed
+It does not yet prove advanced troubleshooting competence. To reach that level, I need to use these tools during real broken-service, networking, package, storage, and automation incidents.
