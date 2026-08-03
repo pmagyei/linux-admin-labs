@@ -1,0 +1,10 @@
+2026-07-11 09:00:01 INFO ssh login accepted user=lfcs-admin src=`ipaddress`
+2026-07-11 09:01:04 INFO ssh session opened user=lfcs-admin
+2026-07-11 09:03:22 WARNING disk usage high filesystem=/var usage=82
+2026-07-11 09:05:10 ERROR nginx failed to bind port=80
+2026-07-11 09:06:15 INFO nginx reload successful
+2026-07-11 09:07:30 ERROR ssh authentication failed user=test src=`ipaddress`
+2026-07-11 09:09:44 INFO backup started job=daily
+2026-07-11 09:10:01 ERROR backup failed reason=permission_denied
+2026-07-11 09:11:33 WARNING memory pressure high usage=78
+2026-07-11 09:12:00 INFO ssh login accepted user=lfcs-admin src=`ipaddress`

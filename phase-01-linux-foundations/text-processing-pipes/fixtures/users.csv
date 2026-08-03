@@ -1,0 +1,6 @@
+username,role,department,shell
+lfcs-admin,admin,infrastructure,/bin/bash
+srvadmin,operator,platform,/bin/bash
+srvengin,engineer,platform,/bin/bash
+backupuser,service,infrastructure,/usr/sbin/nologin
+testuser,guest,temporary,/bin/sh
