@@ -1,8 +1,7 @@
 # Linux-Admin-Labs repository 
 
 ## Phase 1
-navigation <br>
-files/directories <br>
+Navigation and Filesystem Operations <br>
 [text processing & pipes](/phase-01-linux-foundations/text-processing-pipes/) <br>
 [permissions](/phase-01-linux-foundations/permissions/) <br>
 [processes](/phase-01-linux-foundations/processes/) <br>

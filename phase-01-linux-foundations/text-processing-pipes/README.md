@@ -39,7 +39,7 @@ Becasue the file has 10 lines, `head` and `tail` displayed the whole document. B
 
 ### Mistake/observation
 
-I made a quoting mistake while creating the here-doc, so the shell kept waiting for inoputs. I exited the unfinished command with `ctrl+c`, which sends SIGINT.
+I made a quoting mistake while creating the here-doc, so the shell kept waiting for inputs. I exited the unfinished command with `ctrl+c`, which sends SIGINT.
 
 ![service.log](lab_images/Screenshot8.png)
 
@@ -75,7 +75,7 @@ the command `grep -vi "info" service.log` looks for lines that do not match the 
 1) `-v` would print all the lines, since none of the lines matche the pattern(inverst the match)
 2) `-i` would ignore the case differences, so wether it's in capital or not it is excluded before sending to stdout, this works as a restrictive filter
 
-`grep` can be  as filter to remove noise and restrcit your searches, during troubleshooting you want specific patterns/logs.
+`grep` can be  as filter to remove noise and restrict your searches, during troubleshooting you want specific patterns/logs.
 
 applying broad patterns to your searches could result in more noise to get through which can lead to longer time troubleshooting. also a broad search mightt obfuscate the real issue if you are using the wrong logs to determine the problem.
 
@@ -113,14 +113,14 @@ looks for "ssh" related lines, then removes lines containing `failed`.
 
 ## Lab 4: sort and uniq
 
-the `cut -d' ' -f3 service.log` uses a single space as the delimeter and extracts field 3 from each line.
+the `cut -d' ' -f3 service.log` uses a single space as the delimiter and extracts field 3 from each line.
 in this log format field 3 is the severity level: `INFO`, `WARNING`, `ERROR`.
 ![cut_service.log](lab_images/Screenshot18.png)
 
 
 `cut -d' ' -f3 service.log | sort`<br>
 `sort` is needed before `uniq` because it only compares adajacent lines. if duplicates are separated by other values `uniq` will not collapse them into one result.
-using `sort` ensures the duplicates are adjacent. without `sort. 
+using `sort` ensures the duplicates are adjacent. 
 ![cut_service.log_sort](lab_images/Screenshot19.png)
 
 
@@ -146,7 +146,7 @@ The `users.csv` file use a comma as the delimiter. A delimiter is the character 
 This uses ',' as the delimeter, and extracts field 1 which is the username field. 
 ![cut-d-f1_users.csv](lab_images/Screenshot23.png)
 
-`cut -d',' -f1 users.csv`, extracts field 2 which is the role field. 
+`cut -d',' -f2 users.csv`, extracts field 2 which is the role field. 
 ![cut-d-f2_users.csv](lab_images/Screenshot24.png)
 
 
@@ -168,14 +168,14 @@ Both use `/bin/bash`
 
 ### `cut` Limitation
 
-`cut` works well for simple prdictable delimeter-based files. if a file contains multiple chracters or complex formatting, `cut` may produce incorrect results.
+`cut` works well for simple prdictable delimeter-based files. if a file contains multiple chracters or complex formatting such as multiple consecutive delimiters, variable-width whitespace and embedded commas. `cut` is not a CSV parse and it may produce incorrect results.
 
 ## Lab 6: awk field extraction
 
 `awk` is pattern-action processing language.
 
 the basic structure is:
-`pattern { action }`, if the pattern matches, `awk` performs the action. if no pattern is provided, the action runs for eveyline.
+`pattern { action }`, if the pattern matches, `awk` performs the action. if no pattern is provided, the action runs for everyline.
 
 By default awk separates fields by using whitespaces.
 
@@ -209,7 +209,7 @@ The matching users are:
 ## Lab 7: sed transformations
 
 `sed` is stream editor for filtering and transforming text
-`sed` reads input linen by line, appllies editing rules, and prints the result to stdout by deafult. It does not modify the orifinal file unless `-i` is used or putput is tediecteed to another file.
+`sed` reads input linen by line, appllies editing rules, and prints the result to stdout by deafult. It does not modify the original file unless `-i` is used or output is tediecteed to another file.
 
 ### Substitution 
 
@@ -259,7 +259,7 @@ Sensitive data that should be redacted before publishing includes:
 
 ### stdout
 
-`stdout`is the startds output strean. By default, stdout is displayed in the termimal, but it can redirected to a file.
+`stdout`is the standard output strean. By default, stdout is displayed in the termimal, but it can redirected to a file.
 
 `grep "ERROR" service.log > errors.log`, 
 This searches `service.log` for lines containing "ERROR", if there are matches these are written to 'errors.log'.
@@ -277,7 +277,7 @@ The `>>` operator redirects stdout and appends the target file instead of overwr
 
 ### stderr
 
-`stderr` is the standard error steram. Progrms use sterr for error and iagnostic messages.
+`stderr` is the standard error stream. Progrms use sterr for error and iagnostic messages.
 
 `ls /not/a/real/path > stdout.log`
 This redirects stdout to `stdout.log` but the path does not exist. The error message still appeard to the terminal because it was written to `stderr` not `stdout`.
@@ -309,13 +309,13 @@ For this lab I queried SSH service logs and built a pipeline to filter, redact, 
 
 This searched for the last 50 SSH journal entries for lines containing `accepted`. The ssh matching events showed SSH public key authentication being accepted.
 
-I used `sed` to redact senitive values before pulishing the output. 
+I used `sed` to redact sensitive values before pulishing the output. 
 
 The redacted values include:
 - Source IP address
 - SSH public key fingerprint
 
-This matters because logs can expose internal IP's, usernames, hostnames and authentication figerprints.
+This matters because logs can expose internal IP's, usernames, hostnames and authentication fingerprints.
 
 ![grep_sed.journalctl_ssh](lab_images/Screenshot39.png)
 
@@ -353,7 +353,7 @@ When using `grep`, if the pattern is too narrow, you risk excluding logs that ar
 For example, `accepted` is broader than `Accepted publickey`.
 
  
-## Lab 10: pipeline reliability and reporting
+## Lab 10: pipeline traps and reporting
 
 ### Part A grep process trap
 
@@ -362,31 +362,33 @@ For example, `accepted` is broader than `Accepted publickey`.
 
 `ps` displays information of active processes.<br> 
 `ps aux | grep sleep` 
-`ps aux` displays information of actives processes, its stdout is piped into `grep sleep` fwhich prints lines that contain the pattern `sleep`. I expected only the `sleep` process to show, however there was another entry from `grep`; `grep` is also a process, if the search pattern appears in the grep command line, grep can match itsel. This proves that pipelines can  also produce  misleading results.
+`ps aux` displays information of actives processes, its stdout is piped into `grep sleep` which prints lines that contain the pattern `sleep`. I expected only the `sleep` process to show, however there was another entry from `grep`; `grep` is also a process, if the search pattern appears in the grep command line, grep can match itsel. This proves that pipelines can  also produce  misleading results.
 ![psaux|grepsleep_](lab_images/grep-process-trap/Screenshot44.png)
 
 
 `ps aux | grep sleep | grep -v grep` 
-`-v` is invert-match, it selects non-matching lines to send to stdout. In this case only the lines that do not contain `grep` were printed.  
+`-v` is invert-match, it selects non-matching lines to send to stdout. In this case only the lines that do not contain `grep` were printed.
+This can remove legitimate process lines if their command line containt the word `grep`.
 ![psaux|grepsleep|grep-v](lab_images/grep-process-trap/Screenshot45.png)
 
 
 `ps aux | grep '[s]leep'` matches the line containing `sleep`, because `[s]` matches the character `s`. 
-However, the grep command containt the pattern `[sleep]`, not the literal string `sleep`, so grep does not match its own process line.
+However, the grep command containt the pattern `[s]leep`, not the literal string `sleep`, so grep does not match its own process line.
 
-![psaux|grep[s]leep](lab_images/grep-process-trap/Screenshot46.png)
+![psaux|grepsleep](lab_images/grep-process-trap/Screenshot46.png)
 
 
-`pgrep -a sleep`, `pgrep` lists outputs PIDs which match the selection criteria to stdout. `pgrep` will only list the processes that match the criteria.
+`pgrep -a sleep`
+`pgrep` matches the process name. `-a` flag lists PID and full command line for the matching process.
 
-![pgre-asleep](lab_images/grep-process-trap/Screenshot47.png)
+![pgrep-asleep](lab_images/grep-process-trap/Screenshot47.png)
 
 
 `ps` can still be usefull as it also shows the command, user, stat and pid. When investigating an event having several refrences point to connect the dots will allow trooubleshoting be more accurate.
 
 ### Part B awk counts and reporting
 
-`awk '{count[$3]++} END {for (level in count) print count[level], level}' service.log`, counts how many times each warning level appears in the 3rd column and prints the list.
+`awk '{count[$3]++} END {for (level in count) print count[level], level}' service.log`, counts how many times each severity level appears in the 3rd column and prints the list.
 ![awk_count-level](lab_images/awk-counts/Screenshot1.png)
 
 `awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log`, similarly to the above however it counts how many times each service appears in the 4th column and prints the list.
@@ -395,14 +397,18 @@ However, the grep command containt the pattern `[sleep]`, not the literal string
 `awk '$3=="ERROR" {print $1, $2, $4, $5, $6, $7}' service.log`, looks for the lines where the 3rd field is `ERROR`, then prints the date, time, service name, and part of the error message.
 ![awk_count-level](lab_images/awk-counts/Screenshot3.png)
 
-`awk '{count[$3]++} END {for (level in count) print count[level], level}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each severity level appears in the 3rd column and prints the list sorted from highest occurences to the lowest.
+`awk '{count[$3]++} END {for (level in count) print count[level], level}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each severity level appears in the 3rd column and prints the list sorted from highest occurrences to the lowest.
 INFO appeared the most in the severity.
+![awk_count-level-nr](lab_images/awk-counts/Screenshot4.png)
 
-`awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each service appears in the 4th column and prints the list sorted from highest occurences to the lowest. SSH has the most apperances
+
+`awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each service appears in the 4th column and prints the list sorted from highest occurrences to the lowest. SSH has the most appearances
+![awk_count-service-nr](lab_images/awk-counts/Screenshot5.png)
+
 
 
 #### awk vs cut
-awk is better because by default it splits lines by whitespace as well as that i can handle more complex pattern processing than cut, cut is used for simple predictable field extraction when the delimiter and field positions are predictable; i`awk` is better here becasue it can filter, count and generate reports. Counts should be treated as evidence, not final conclusions. They depend on  the log source, time window, filters, and field assumptions in the pipeline.
+awk is better because by default it splits lines by whitespace as well as that i can handle more complex pattern processing than cut, cut is used for simple predictable field extraction when the delimiter and field positions are predictable; i`awk` is better here because it can filter, count and generate reports. Counts should be treated as evidence, not final conclusions. They depend on  the log source, time window, filters, and field assumptions in the pipeline.
 
 
 ## Final mental model
