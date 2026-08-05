@@ -3,7 +3,7 @@
 The goal is to build evidence that I understand:
 - absolute and relative paths
 - path resolution
-- Directory entries vs directory contents
+- directory entries vs directory contents
 - safe use of `mkdir`, `touch`, `cp`, `mv` and `rm`
 - verification before destructive operations
 
@@ -12,10 +12,38 @@ The goal is to build evidence that I understand:
 
 ### Lab environment
 
-In this lab I created a directory with subfolders and files, the structure and contents can be found [here](/phase-01-linux-foundations/navigation-filesystem-operations/fixtures/)
+In this lab I created a directory with subfolders and files, the structure and contents can be found [here](./fixtures/navigation-filesystem-lab/)
 
-![ss](lab_images/path-resolution/Screenshot1.png)
 
+I used `mkdir -pv navigation-filesystem-lab/{apps/{api/config,web/public},archive,incoming,reports}` to create the skeleton of the directory
+
+`mkdir` creates directories
+`-p` doesn't produce an error if existing and it make parent directories as needed
+`-v` is verbose, it will print a message for each directory created
+
+![mkdir-directory-tree](lab_images/lab-environment/Screenshot1.png)
+
+The `{}` is the shell's brace expansion which allows creation of subfolders.
+
+I validated and confirmed the directory's creation by using:
+- `ls -lai navigation-filesystem-lab`<br>
+`-l` lists the long format
+`-a` does not ignore entries that start with `.`
+`-i` prints the inode number of each file
+
+- `tree navigation-filesystem-lab`
+- `find navigation-filesystem-lab`
+
+![validate-directory-tree](lab_images/lab-environment/Screenshot3.png)
+
+I proceeded to populate the directory with files, for this is use the `touch` command, and validate using `tree` and `ls -a`:
+
+![touch_files-config](lab_images/lab-environment/Screenshot4.png)
+![touch_files-public](lab_images/lab-environment/Screenshot5.png)
+
+
+Final directory structure for the lab:
+![final_directory-tree](lab_images/lab-environment/Screenshot0.png)
 
 
 ### current working directory
@@ -31,12 +59,18 @@ In this lab I created a directory with subfolders and files, the structure and c
 
 the flags:
 - `-l` lists long format
-- `-d` causes `ls` ti lists the directories but not their contents
+- `-d` causes `ls` to list a directory as an entry rather than the contents inside it
 - `-a` does not ignore files starting with `.`.
 
 `ls -ld .` lists the current working directory itself whereas `ls -a .` lists all the contents within the current working directory.
 
 ![current_working_directory](lab_images/path-resolution/Screenshot2.png)
+
+### Directory entries vs directory contents
+
+A directory entry links the file name to the index number(inode), commands such as `mv` and `rm` often operate on these dentries. Renaming a file changes the pathname entry; it does not rewrite the file's contents.
+
+Directory contents are the actual data/information that reside in the item listed.
 
 ### parent navigation
 
@@ -47,7 +81,7 @@ to list the contents of the parent directory I used `ls ..`
 
 ### absolute vs relative vs home-expanded
 
-I use three ways to inspect the archive directory:
+I used three ways to inspect the archive directory:
 
 absolute path: `ls /home/lfcs-admin/navigation-filesystem-lab/archive/`
 relative path: `ls ../../../archive/`
@@ -57,7 +91,7 @@ home-expanded: `ls ~/navigation-filesystem-lab/archive/`
 ![relative-path](lab_images/path-resolution/Screenshot4.2.png)
 
 
-`tree` is another program that I regularly use to confirm and validate the strcuture of directories and contents: 
+`tree` is another program that I regularly use to confirm and validate the structure of directories and contents: 
 ![tree_absolute-vs-relative](lab_images/path-resolution/Screenshot5.png)
 
 
@@ -82,11 +116,10 @@ the correct relative path is one level above `apps`, `../../../archive`
 `mv app.log ~/navigation-filesystem-lab/reports/api-startup.log` both moves and renames the pathname.
 ![move-rename](lab_images/copy-move-rename/Screenshot3.png) 
 
-`mv .secrets.example .env.example` renames the the directory entry
+`mv .secrets.example .env.example` on the same filesystem `mv` usually renames the directory entry, accross filesystems the directory entry is copied to the destination and removed from the source.
 ![rename](lab_images/copy-move-rename/Screenshot4.png)
 
 ## Safe deletion
-
 
 my current working directory was `/home/lfcs-admin/navigation-filesystem-lab/apps/api/config`
 
@@ -100,8 +133,8 @@ Confirmed the targets metadata and entry
 I used a relative path to delete the file `rm ../../../incoming/report.txt`
 ![rm-report.txt](lab_images/safe-deletion/Screenshot3.png)
 
-`rm` removes non-directories entries by default, the `incoming` directory should still exist. Recursive directory removal requires the `-r`.
+`rm` removes non-directory entries by default, the `incoming` directory should still exist. `rm -r`  recursively removes a directory tree, while `rmdir` removes an empty directory.
 
-I confirmed that the removed and proved that the `incoming` directory still existed by using the `ls` and `tree` programs.
+I confirmed that the file had been removed and proved that the `incoming` directory still existed by using the `ls` and `tree` programs.
 
 ![ls-tree-report.txt](lab_images/safe-deletion/Screenshot4.png)

@@ -362,29 +362,29 @@ For example, `accepted` is broader than `Accepted publickey`.
 
 `ps` displays information of active processes.<br> 
 `ps aux | grep sleep` 
-`ps aux` displays information of actives processes, its stdout is piped into `grep sleep` which prints lines that contain the pattern `sleep`. I expected only the `sleep` process to show, however there was another entry from `grep`; `grep` is also a process, if the search pattern appears in the grep command line, grep can match itsel. This proves that pipelines can  also produce  misleading results.
+`ps aux` displays information of active processes, its stdout is piped into `grep sleep` which prints lines that contain the pattern `sleep`. I expected only the `sleep` process to show, however there was another entry from `grep`; `grep` is also a process, if the search pattern appears in the grep command line, grep can match itself. This proves that pipelines can  also produce  misleading results.
 ![psaux|grepsleep_](lab_images/grep-process-trap/Screenshot44.png)
 
 
 `ps aux | grep sleep | grep -v grep` 
 `-v` is invert-match, it selects non-matching lines to send to stdout. In this case only the lines that do not contain `grep` were printed.
-This can remove legitimate process lines if their command line containt the word `grep`.
+This can remove legitimate process lines if their command line contains the word `grep`.
 ![psaux|grepsleep|grep-v](lab_images/grep-process-trap/Screenshot45.png)
 
 
 `ps aux | grep '[s]leep'` matches the line containing `sleep`, because `[s]` matches the character `s`. 
-However, the grep command containt the pattern `[s]leep`, not the literal string `sleep`, so grep does not match its own process line.
+However, the grep command contains the pattern `[s]leep`, not the literal string `sleep`, so grep does not match its own process line.
 
 ![psaux|grepsleep](lab_images/grep-process-trap/Screenshot46.png)
 
 
 `pgrep -a sleep`
-`pgrep` matches the process name. `-a` flag lists PID and full command line for the matching process.
+`pgrep` matches the process name. `-a` flag lists PID and full command line.
 
 ![pgrep-asleep](lab_images/grep-process-trap/Screenshot47.png)
 
 
-`ps` can still be usefull as it also shows the command, user, stat and pid. When investigating an event having several refrences point to connect the dots will allow trooubleshoting be more accurate.
+`ps` can still be usefull as it also shows the command, user, stat and pid. During an investigating, cross-checking evidence with multiple tools reduces the risk of drawing conclusions from a misleadng pipeline.
 
 ### Part B awk counts and reporting
 
@@ -402,13 +402,17 @@ INFO appeared the most in the severity.
 ![awk_count-level-nr](lab_images/awk-counts/Screenshot4.png)
 
 
-`awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each service appears in the 4th column and prints the list sorted from highest occurrences to the lowest. SSH has the most appearances
+`awk '{count[$4]++} END {for (service in count) print count[service], service}' service.log | sort -nr`, parses the `service.log `file: it counts how many times each service appears in the 4th column and prints the list sorted from highest occurrences to the lowest. SSH has the most appearances.
 ![awk_count-service-nr](lab_images/awk-counts/Screenshot5.png)
 
-
+The order produce from `for (key in count)` is not guaranteed, a separate `sort` stage is required when ordered output is needed.
 
 #### awk vs cut
-awk is better because by default it splits lines by whitespace as well as that i can handle more complex pattern processing than cut, cut is used for simple predictable field extraction when the delimiter and field positions are predictable; i`awk` is better here because it can filter, count and generate reports. Counts should be treated as evidence, not final conclusions. They depend on  the log source, time window, filters, and field assumptions in the pipeline.
+
+`cut` is suitable for simple predictable field extraction when the delimiter and field positions are predictable.
+`awk` is more appropriate here because it can perform field comparisons, mantainc counters, aggregate records, and generate reports. Neitheirt tool id universally better; the correct choice depends on the required processing.
+
+Counts should be treated as evidence, not final conclusions. They depend on  the log source, time window, filters, and field assumptions in the pipeline.
 
 
 ## Final mental model
