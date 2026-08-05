@@ -4,7 +4,7 @@ The goal is to build evidence that I understand:
 - absolute and relative paths
 - path resolution
 - Directory entries vs directory contents
-- safe use of `mkdir`, ` touch`, `cp`, `mv` and `rm`
+- safe use of `mkdir`, `touch`, `cp`, `mv` and `rm`
 - verification before destructive operations
 
 
@@ -27,11 +27,11 @@ In this lab I created a directory with subfolders and files, the structure and c
 
 `pwd` prints the absolute path of the current working directory
 
-`ls` lists directory contents
+`ls` lists the contents of the current directory.
 
 the flags:
 - `-l` lists long format
-- `-d` lists directories entries
+- `-d` causes `ls` ti lists the directories but not their contents
 - `-a` does not ignore files starting with `.`.
 
 `ls -ld .` lists the current working directory itself whereas `ls -a .` lists all the contents within the current working directory.
@@ -47,7 +47,7 @@ to list the contents of the parent directory I used `ls ..`
 
 ### absolute vs relative vs home-expanded
 
-These are the two ways I used to inspect the archive directory:
+I use three ways to inspect the archive directory:
 
 absolute path: `ls /home/lfcs-admin/navigation-filesystem-lab/archive/`
 relative path: `ls ../../../archive/`
@@ -56,12 +56,14 @@ home-expanded: `ls ~/navigation-filesystem-lab/archive/`
 ![absolute-path](lab_images/path-resolution/Screenshot4.1.png)
 ![relative-path](lab_images/path-resolution/Screenshot4.2.png)
 
+
+`tree` is another program that I regularly use to confirm and validate the strcuture of directories and contents: 
 ![tree_absolute-vs-relative](lab_images/path-resolution/Screenshot5.png)
 
 
 ### Controlled failure
 
-the current working the directory was `/home/lfcs-admin/navigation-filesystem-lab/apps/api/config`
+the current working directory was `/home/lfcs-admin/navigation-filesystem-lab/apps/api/config`
 
 I used `ls ../../archive`, this did not work because `archive` is not in the `apps` folder  where `../../` points to.
 
@@ -74,7 +76,7 @@ the correct relative path is one level above `apps`, `../../../archive`
 
 ## Copy, move and rename
 
-`cp settings.conf ~/navigation-filesystem-lab/archive/settings.conf.bak`, creates a separate  file at another destination under a new pathname and copies the source contents into into it, the original pathname remains unchnaged.
+`cp settings.conf ~/navigation-filesystem-lab/archive/settings.conf.bak`, creates a separate  file at another destination under a new pathname and copies the source contents into it, the original pathname remains unchanged.
 ![copy-rename](lab_images/copy-move-rename/Screenshot2.png)
 
 `mv app.log ~/navigation-filesystem-lab/reports/api-startup.log` both moves and renames the pathname.
@@ -95,12 +97,11 @@ Confirmed the targets metadata and entry
 ![ls-ld-report.txt](lab_images/safe-deletion/Screenshot2.png)
 
 
-I used a relative path to delete the file `rm ~/navigation-filesystem-lab/incoming/report.txt`
+I used a relative path to delete the file `rm ../../../incoming/report.txt`
 ![rm-report.txt](lab_images/safe-deletion/Screenshot3.png)
 
-`rm` removes files or directories, the `incoming` directory should still exist. if I wanted to destroy the directory as well I would add the `-r` flag.
+`rm` removes non-directories entries by default, the `incoming` directory should still exist. Recursive directory removal requires the `-r`.
 
-I check that the file no longer exist and proved that the `incoming` directory still existed by using the `ls` and `tree` programs.
+I confirmed that the removed and proved that the `incoming` directory still existed by using the `ls` and `tree` programs.
 
 ![ls-tree-report.txt](lab_images/safe-deletion/Screenshot4.png)
-
