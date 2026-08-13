@@ -74,6 +74,3 @@ when running the command `printf '<%s>\n' "tmp/*.conf"` and `printf '<%s>\n' 'tm
 [globbing](./lab_images/quoting-expansions/S2.png)
 
 [commandsubstitution](./lab_images/quoting-expansions/S2.png)
-
-
-I am struggling with lab 3, review lab 1 + 2, once lab 1 + 2 are acceptable I will move on to lab 3

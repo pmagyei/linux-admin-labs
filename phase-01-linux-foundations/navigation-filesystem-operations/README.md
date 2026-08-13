@@ -18,7 +18,8 @@ In this lab I created a directory with subfolders and files, the structure and c
 I used `mkdir -pv navigation-filesystem-lab/{apps/{api/config,web/public},archive,incoming,reports}` to create the skeleton of the directory
 
 `mkdir` creates directories
-`-p` doesn't produce an error if existing and it make parent directories as needed
+`-p` does not report an error when a directory already exists and creates missing parent directories as needed.
+
 `-v` is verbose, it will print a message for each directory created
 
 ![mkdir-directory-tree](lab_images/lab-environment/Screenshot1.png)
@@ -38,6 +39,8 @@ I validated and confirmed the directory's creation by using:
 
 I proceeded to populate the directory with files, for this is use the `touch` command, and validate using `tree` and `ls -a`:
 
+`touch` creates an empty file when the pathname does not exist; If it already exists the timestamps are updated, no new file will be created.
+
 ![touch_files-config](lab_images/lab-environment/Screenshot4.png)
 ![touch_files-public](lab_images/lab-environment/Screenshot5.png)
 
@@ -51,7 +54,7 @@ Final directory structure for the lab:
 `.` is the current folder
 `..` is the parent folder
 `/` is the system root
-`~` is the home folder
+`~` is expanded by the shell into the current user's home directory
 
 `pwd` prints the absolute path of the current working directory
 
@@ -68,9 +71,7 @@ the flags:
 
 ### Directory entries vs directory contents
 
-A directory entry links the file name to the index number(inode), commands such as `mv` and `rm` often operate on these dentries. Renaming a file changes the pathname entry; it does not rewrite the file's contents.
-
-Directory contents are the actual data/information that reside in the item listed.
+A directory contains entries that that are associated with the inode numbers. `ls` lists those entries. A file's inode refers to the its metadat and data blocks. Renaming a file changes the pathname entry; it does not rewrite the file's contents.
 
 ### parent navigation
 
@@ -116,7 +117,7 @@ the correct relative path is one level above `apps`, `../../../archive`
 `mv app.log ~/navigation-filesystem-lab/reports/api-startup.log` both moves and renames the pathname.
 ![move-rename](lab_images/copy-move-rename/Screenshot3.png) 
 
-`mv .secrets.example .env.example` on the same filesystem `mv` usually renames the directory entry, accross filesystems the directory entry is copied to the destination and removed from the source.
+`mv .secrets.example .env.example` on the same filesystem `mv` can rename the directory entry without copying the file data. accross filesystems `mv` copies the file data and metaddat to the destination and removes from the source after the copy succeds.
 ![rename](lab_images/copy-move-rename/Screenshot4.png)
 
 ## Safe deletion
@@ -126,7 +127,7 @@ my current working directory was `/home/lfcs-admin/navigation-filesystem-lab/app
 I carried out checks in the `~/navigation-filesystem-lab/incoming` directory to ensure that the `report.txt` file was present before deleting it.
 ![ls~report.txt_pwd](lab_images/safe-deletion/Screenshot1.png)
 
-Confirmed the targets metadata and entry
+Confirmed the target's metadata and entry
 ![ls-ld-report.txt](lab_images/safe-deletion/Screenshot2.png)
 
 
