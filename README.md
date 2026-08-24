@@ -7,7 +7,7 @@
 [processes](/phase-01-linux-foundations/processes/) <br>
 [systemd & services](/phase-01-linux-foundations/systemd/) <br>
 [logs & journalctl](/phase-01-linux-foundations/journalctl-logs/) <br>
-environment <br>
+[environment-shell-path](/phase-01-linux-foundations/environment-shell-path/) <br>
 networking <br>
 package management <br>
 man-page fluency
@@ -31,7 +31,7 @@ SSH hardening <br>
 basic firewall rules <br>
 backup scripts <br>
 
-Terraform - Aws integration: <br>
+Terraform - aws integration: <br>
 Deploy EC2 Linux instance <br>
 harden SSH <br>
 attach EBS volume<br>
