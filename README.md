@@ -9,7 +9,7 @@
 [logs & journalctl](/phase-01-linux-foundations/journalctl-logs/) <br>
 [environment-shell-path](/phase-01-linux-foundations/environment-shell-path/) <br>
 networking <br>
-package management <br>
+[package management](/phase-01-linux-foundations/package-management/) <br>
 man-page fluency
 
 ## Phase 2
