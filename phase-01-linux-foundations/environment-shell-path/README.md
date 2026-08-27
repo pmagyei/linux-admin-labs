@@ -342,3 +342,151 @@ Because the command substitution captures `stdout` the command became `export PA
 I was able to restore it using `export PATH=$(echo "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin")`
 
 ![path-broken-shell](./lab_images/command-lookup-PATH-modificaiton/path-broken-shell.png)
+
+
+## Lab 5: Persistent environment and shell startup files
+
+
+### Shell type and login behaviour
+
+[shell-type](./lab_images/persistent-environment-and-shell/s1.png)
+
+`echo "$0"`
+
+returns:
+`-bash`
+
+`shopt -q login_shell`, returns the shell prompt, this makes the current shell interactive.
+
+`echo $?`
+
+returns `0` indicaing its a login shell
+
+My current shell has the login_shell option enables and it is also interactive
+
+
+`bash -c 'echo "$0"; shopt -q login_shell; echo $?`
+returns:
+
+bash with exit code `1`, indicating that the child shell is a non login_shell. `-c` prevents any prompts, making this child shell non-interactive.
+
+`bash --login -c 'echo "$0"; shopt -q login_shell; echo $?`
+returns: 
+
+bash with exit code `0` indicating that it's a login shell but it is not interactive, because `-c` is executing.
+
+
+### Startup files discovered
+
+[startup_files](./lab_images/persistent-environment-and-shell/s2.png)
+
+The startup files that are present on my system are `.bashrc` and `.profile`, 
+
+[~/.bashrc](./lab_images/persistent-environment-and-shell/s3.png)
+
+[~/.profile](./lab_images/persistent-environment-and-shell/s4.png)
+
+The `.profile` file references `.bashrc`, if bash is present on the system
+
+The `.profile` is intended for login/sessions shells
+
+The `.bashrc` profile is usually intended for interactive non-login Bash shells
+
+[.profile_.bashrc](./lab_images/persistent-environment-and-shell/s5.png)
+
+
+### Temporary variable inheritance
+
+I created a temporary variable and exported allowing for subsequent child shell's to inherit the parent's variable.
+
+[temp_variable](./lab_images/persistent-environment-and-shell/s6.png)
+
+I `bash -c` starts a new child process, this child process inherits the parent's environment variables after exporting; `printf "%s\n" "$LAB_PERSISTENCE"` validates that the child process has inherited the parent shell environment's variables.
+
+Starting a new independent shell\terminal loads a new shell from the startup configuration which does not include the temporary created variable
+
+### Persistent variable configuration
+
+`LAB=PERSISTENCE` needs to survive/exits in future login shells. to accomplish this I will need to edit the `.profile` configuration file because:
+
+`.profile` is the user login-shell startup file in this system
+`.profile` sources `.bashrc` if Bash is running
+`.bashrc` is primarily for interactive non-login. Bash shells
+
+
+`.profile` is part of the login-shell startup path.
+
+mental model:
+
+`.profile`: what should exist when my shell starts/logins
+`.bashrc`: how should the shell behave when I interact with it.
+
+during a shell startup and login: the `.profile` file configuration is reads, it can source the `.bashrc` file. 
+
+#### failure
+
+I did not run: `printf '%s\n' "export LAB_PERSISTENCE=from_startup_file" >> ~/.profile` to append `LAB_PERSISTENCE=from_startup_file` to the startup config file.
+
+
+[export_variable_two_terminals](./lab_images/persistent-environment-and-shell/s7.png)
+[no_variable_new_shell](./lab_images/persistent-environment-and-shell/s8.png)
+[missing_export_variable_.profle](./lab_images/persistent-environment-and-shell/s9.png)
+
+
+### Current-shell vs new-shell verification
+
+after running `printf '%s\n' "export LAB_PERSISTENCE=from_startup_file" >> ~/.profile`
+
+
+
+running `printf '%s\n' "${LAB_PERSISTENCE:-UNSET}"` and `bash -c 'printf "%s\n" "${LAB_PERSISTENCE:-UNSET}"'` on the tmux pane on the right the new ssh session both returned `from_startup_file`
+
+meaning starting new shells and login in, allow the environment variables to persist in addition to this the child shells also inherit the environment.
+
+[persistent_variable_tmux_pane](./lab_images/persistent-environment-and-shell/s10.png)
+
+[persistent_variable_new_ssh_session](./lab_images/persistent-environment-and-shell/s11.png)
+
+
+### Controlled failure: wrong startup file
+
+I appended `export WRONG_SHELL_TYPE=lab_test`to the `.zshrc` file
+[zshrc_append](./lab_images/persistent-environment-and-shell/s12.png)
+
+
+I started a new shell session with bash, which is read by `.profile`
+
+I ran `printf '%s\n' "${WRONG_SHELL_TYPE:-UNSET}"` it returned `UNSET` meaning the variable was not carried over to the new shell session, this is the expected state because `.profile` references `.bashrc`not `.zshrc`.
+
+the root cause: incorrect shell config was edited, the minimal corrections would be: remove the appended line from `.zshrc` and append to `.bashrc`.
+
+
+verification:
+
+[tmux_bashrc](./lab_images/persistent-environment-and-shell/s13.png)
+[new_ssh_ session](./lab_images/persistent-environment-and-shell/s14.png)
+
+
+
+### Persistent PATH configuration
+
+appended `PATH="$PATH:/home/lfcs-admin/environment-shell-path-lab/bin"` to the `.profile` with `printf '%s\n' 'PATH="$PATH:/home/lfcs-admin/environment-shell-path-lab/bin"' >> ~/.profile`
+
+`PATH="$PATH:/home/lfcs-admin/environment-shell-path-lab/bin"` is in the `.profile` startup file, every time a new shell starts, the path variable is loaded, allow `show-context.sh` which resides in the lab `/bin` directory to be looked up by bash.
+
+[persistent_.profile](./lab_images/persistent-environment-and-shell/s15.png)
+
+[.profile_tail](./lab_images/persistent-environment-and-shell/s16.png)
+
+
+persistence is controlled by what is in the `.profile` file, this file looked up by shell every time new shell starts allowing new sessions to contain peristent PATH. `export` on the other hand allows child shell's to inherit the parent's environment variables.
+
+
+
+### Rollback
+
+restored original startup files from my backups, verified that test variables were not present, `bin` directory disappeared from `PATH`
+
+initial behaviour restored
+
+[rollback](./lab_images/persistent-environment-and-shell/s17.png)
