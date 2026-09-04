@@ -1,4 +1,4 @@
-# Package Ownership, Files, and Integrity
+# APT Repositories, Sources & Trust
 
 
 ## VM's repository configuration
