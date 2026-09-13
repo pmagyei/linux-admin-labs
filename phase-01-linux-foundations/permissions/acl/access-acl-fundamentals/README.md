@@ -167,12 +167,3 @@ bash: report.txt: Permission denied
 ![](./lab_images/angel_permission_denied.png)
 
 The result matches the ACL model
-
-
-
-
-
-
-
-
-
