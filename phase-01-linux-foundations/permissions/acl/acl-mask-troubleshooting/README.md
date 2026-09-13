@@ -108,6 +108,3 @@ bash: report.txt: Permission denied
 This allowed to verify that the change did also expand to `other`. The mask was modified from `r--` to `rw-`, increasing the the permissions to the group ACL entries. Functional verification confirmed Carol regained the intended write access while Angel, who is classed as other; `other::---`, remained unable to read or write.
 
 The Rollback would have been to set the acl mask's state to the previous state before I made change which would have also negated Carol access. 
-
-
-
