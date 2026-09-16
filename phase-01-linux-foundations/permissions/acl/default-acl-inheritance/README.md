@@ -222,4 +222,45 @@ mask::rw-
 other::r--
 
 
-### observation
+#### observation
+
+`getfacl -ade shared/dir1`
+
+user::rwx
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rwx
+mask::rwx
+other::r-x
+default:user::rwx
+default:user:carol:r--          #effective:r--
+default:group::rwx              #effective:rwx
+default:mask::rwx
+default:other::r-x
+
+
+`shared/dir1` access ACL remain unchanged but the default ACL changed, which tells me that an access ACL and a default ACL are separate ACL states when linked to the same directory.
+
+
+`getfacl -ade shared/dir1/file2`
+
+file2's ACL remain unchanged, it already has its own ACL, there is backward ACL refresh
+
+user::rw-
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+
+
+`getfacl -ade shared/dir1/file3`
+
+file3 instead: because its a new file its ACL is constructed from the parents default ACL.
+
+user::rw-
+user:carol:r--                  #effective:r--
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+`shared/dir1` 
