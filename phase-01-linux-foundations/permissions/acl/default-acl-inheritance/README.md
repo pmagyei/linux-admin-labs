@@ -146,3 +146,20 @@ The parent default ACL is used to establish the inheritance blueprint, an entry 
 `shared/dir1`
 
 dir1 inherits all access ACL's and the default access ACL's. This tells me that default ACL inheritance continues down the directory tree.
+
+### inheritance tree test:
+
+If I create another file in the the `shared/dir1/` directory, will it inherit `shared/` or `shared/dir1/ `ACL?
+
+`getfacl -ade shared/dir1/file2` prediction : 
+
+file: shared/dir1/file2
+owner: lfcs-admin
+group: lfcs-admin
+user::rw-
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+the default ACL is passed down the inheritance tree, so child directories inherit the default ACL from the previous parent, child files ACL use the default ACL from the directory they are in, the ACL is used as a template to construct their ACL
