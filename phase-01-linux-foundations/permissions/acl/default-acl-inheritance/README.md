@@ -55,7 +55,9 @@ default:other::r-x
 
 ![](./lab_images/setfacl_-m-shared-directory.png)
 
-### inheritance 
+## inheritance 
+
+### prediction
 
 I will test how default access ACL's affect newly created files and directories
 
@@ -74,3 +76,73 @@ user:carol:rw-
 group::rwx
 mask::rwx
 other::r-x
+
+### observed behaviour
+
+I created `file1` and `dir1/` within the `shared/` directory
+
+I ran `getfacl` on all three objects:
+
+
+
+`getfacl shared/`:
+
+lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/
+file: shared/
+owner: lfcs-admin
+group: lfcs-admin
+user::rwx
+group::rwx
+other::r-x
+default:user::rwx
+default:user:carol:rw-          #effective:rw-
+default:group::rwx              #effective:rwx
+default:mask::rwx
+default:other::r-x
+
+
+`getfacl shared/file1`:
+
+lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/file1
+file: shared/file1
+owner: lfcs-admin
+group: lfcs-admin
+user::rw-
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+
+`getfacl shared/dir1`:
+
+lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/dir1/
+file: shared/dir1/
+owner: lfcs-admin
+group: lfcs-admin
+user::rwx
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rwx
+mask::rwx
+other::r-x
+default:user::rwx
+default:user:carol:rw-          #effective:rw-
+default:group::rwx              #effective:rwx
+default:mask::rwx
+default:other::r-x
+
+![](./lab_images/getfacl_shared:_file1_dir1.png)
+
+
+### explanation:
+
+The parent default ACL is used to establish the inheritance blueprint, an entry at creation mode is constrained by the child ACL's of the parent directory
+
+`shared/file1`
+
+`file1` inherits the default access ACLs partially, at creation a file has 0666 - umask, a file is created with no execution rights
+
+
+`shared/dir1`
+
+dir1 inherits all access ACL's and the default access ACL's. This tells me that default ACL inheritance continues down the directory tree.
