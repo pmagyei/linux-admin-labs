@@ -162,4 +162,23 @@ group::rwx                      #effective:rw-
 mask::rw-
 other::r--
 
-the default ACL is passed down the inheritance tree, so child directories inherit the default ACL from the previous parent, child files ACL use the default ACL from the directory they are in, the ACL is used as a template to construct their ACL
+the default ACL is passed downstream to the subsequent directories, so child directories inherit the default ACL from the immediate parent directory's, files created within a directory inherit the ACL from the directory they were created in, the ACL is used as a template to construct their ACL.
+
+#### observation
+
+`getfacl -ade shared/dir1/file2`:
+
+lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/dir1/file2
+# file: shared/dir1/file2
+# owner: lfcs-admin
+# group: lfcs-admin
+user::rw-
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+`file2` verified my prediction: downstream directories inherit the default ACL from the immediate parent directories
+files created within a directory use the immediate parent directory's ACL as template construct their own ACL
+
+![](./lab_images/getfacl_shared:dir1:file2.png)
