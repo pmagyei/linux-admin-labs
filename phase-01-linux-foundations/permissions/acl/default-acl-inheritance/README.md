@@ -169,9 +169,9 @@ the default ACL is passed downstream to the subsequent directories, so child dir
 `getfacl -ade shared/dir1/file2`:
 
 lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/dir1/file2
-# file: shared/dir1/file2
-# owner: lfcs-admin
-# group: lfcs-admin
+file: shared/dir1/file2
+owner: lfcs-admin
+group: lfcs-admin
 user::rw-
 user:carol:rw-                  #effective:rw-
 group::rwx                      #effective:rw-
@@ -182,3 +182,44 @@ other::r--
 files created within a directory use the immediate parent directory's ACL as template construct their own ACL
 
 ![](./lab_images/getfacl_shared:dir1:file2.png)
+
+
+### non-retroactivity
+
+if `shared/dir1`'s default ACL for Carol's entry changes:
+
+does file2 ACL entries also change, if I create a new file, what will its default ACL look like?
+
+proposed change default:user:carol:r--
+
+prediction:
+
+`getfacl -ade shared/dir1/file2`:
+
+remains the same
+
+lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/dir1/file2
+file: shared/dir1/file2
+owner: lfcs-admin
+group: lfcs-admin
+user::rw-
+user:carol:rw-                  #effective:rw-
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+
+`getfacl -ade shared/dir1/file3`:
+
+lfcs-admin@ubuntu-node-1:~/acl-lab$ getfacl -ade shared/dir1/file1
+file: shared/dir1/file3
+owner: lfcs-admin
+group: lfcs-admin
+user::rw-
+user:carol:r--                  #effective:r--
+group::rwx                      #effective:rw-
+mask::rw-
+other::r--
+
+
+### observation
